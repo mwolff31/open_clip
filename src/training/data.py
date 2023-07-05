@@ -341,19 +341,13 @@ def bow_collation_fn(samples, combine_tensors=True, combine_scalars=True):
     """
     assert isinstance(samples[0], (list, tuple)), type(samples[0])
     batched = list(zip(*samples))
+
     result = []
 
-    for idx in range(len(batched)):
-
-        b = batched[idx]
-
-        # image
-        if idx == 0:
-            if combine_tensors:
-                import torch
-                b = torch.stack(list(b))
-
-        result.append(b)
+    if combine_tensors:
+        import torch
+        result.append(torch.stack(list(batched[0])))
+    result.append(batched[1])
 
     return result
 
