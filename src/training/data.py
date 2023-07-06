@@ -352,6 +352,41 @@ def bow_collation_fn(samples, combine_tensors=True, combine_scalars=True):
     return result
 
 
+def default_collation_fn(samples, combine_tensors=True, combine_scalars=True):
+    """Take a collection of samples (dictionaries) and create a batch.
+
+    If `tensors` is True, `ndarray` objects are combined into
+    tensor batches.
+
+    :param dict samples: list of samples
+    :param bool tensors: whether to turn lists of ndarrays into a single ndarray
+    :returns: single sample consisting of a batch
+    :rtype: dict
+
+    """
+    assert isinstance(samples[0], (list, tuple)), type(samples[0])
+    batched = list(zip(*samples))
+    result = []
+    for b in batched:
+        if isinstance(b[0], (int, float)):
+            if combine_scalars:
+                b = np.array(list(b))
+        elif isinstance(b[0], TorchTensor):
+            if combine_tensors:
+                import torch
+
+                b = torch.stack(list(b))
+        elif isinstance(b[0], np.ndarray):
+            if combine_tensors:
+                b = np.array(list(b))
+        else:
+            print(type(b), type(batched))
+            print(type(b[0][0]), len(b[0]))
+            b = torch.stack([bag[0] for bag in b])
+        result.append(b)
+    return result
+
+
 def get_wds_dataset(args, preprocess_img, is_train, epoch=0, floor=False, tokenizer=None):
     input_shards = args.train_data if is_train else args.val_data
     assert input_shards is not None
@@ -424,10 +459,7 @@ def get_wds_dataset(args, preprocess_img, is_train, epoch=0, floor=False, tokeni
 
     def preprocess_txt(txt):
 
-        if isinstance(txt, list):
-            txt = txt[0]
-
-        return tokenizer(txt_filter(txt).split(' '))
+        return [tokenizer(txt_filter(txt).split(' '))]
 
     pipeline.extend([
         wds.select(filter_no_caption_or_no_image),
@@ -435,7 +467,7 @@ def get_wds_dataset(args, preprocess_img, is_train, epoch=0, floor=False, tokeni
         wds.rename(image="jpg;png;jpeg;webp", text="txt"),
         wds.map_dict(image=preprocess_img, text=preprocess_txt),
         wds.to_tuple("image", "text"),
-        wds.batched(args.batch_size, partial=not is_train, collation_fn=bow_collation_fn),
+        wds.batched(args.batch_size, partial=not is_train, collation_fn=default_collation_fn),
     ])
 
     dataset = wds.DataPipeline(*pipeline)

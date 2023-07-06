@@ -257,6 +257,8 @@ class CLIP(nn.Module):
 
         result = torch.cat([torch.mean(result[idx], dim=0, keepdim=True) for idx in range(len(result))])
 
+        print(result.shape)
+
         return F.normalize(x, dim=-1) if normalize else x
 
     def forward(

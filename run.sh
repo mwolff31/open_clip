@@ -13,8 +13,8 @@
 #SBATCH --no-requeue
 
 #SBATCH --job-name=VITB32-200M
-#SBATCH --error=/mnt/lustre/bethge/mwolff70/clip_bow/training_jobs/%j.out # jobid_taskid_arrayid
-#SBATCH --output=/mnt/lustre/bethge/mwolff70/clip_bow/training_jobs/%j.out
+#SBATCH --error=/mnt/lustre/bethge/mwolff70/new_bow/training_jobs/%j.out # jobid_taskid_arrayid
+#SBATCH --output=/mnt/lustre/bethge/mwolff70/new_bow/training_jobs/%j.out
 
 #SBATCH --exclude=r2s-n31    # there is an exclude, be careful!!!!
 
@@ -23,7 +23,7 @@ model=ViT-B-32-bow
 batch_size=600  # 700 is Max for 1 A100 node without grad accumulation
 accum_freq=7
 
-logdir="/mnt/lustre/bethge/mwolff70/clip_bow/logs/"
+logdir="/mnt/lustre/bethge/mwolff70/new_bow/logs/"
 save_dir_name=${name}_$(date +%y%m%d_%H%M%S)
 lr=5e-4
 epochs=32
