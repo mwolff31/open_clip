@@ -1,5 +1,5 @@
 {
-    "embed_dim": 512,
+    "embed_dim": 448,
     "vision_cfg": {
         "image_size": 224,
         "layers": 12,
@@ -7,10 +7,10 @@
         "patch_size": 32
     },
     "text_cfg": {
-        "context_length": 7,
+        "context_length": 8,
         "vocab_size": 49408,
-        "width": 512,
-        "heads": 8,
-        "layers": 12
+        "width": 448,
+        "heads": 4,
+        "layers": 9
     }
 }

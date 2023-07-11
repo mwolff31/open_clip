@@ -397,7 +397,7 @@ def get_wds_dataset(args, preprocess_img, is_train, epoch=0, floor=False, tokeni
 
     def preprocess_txt(txt):
         # 10 here is the max bag size
-        max_bag_size = 10
+        max_bag_size = 18
         tokens = tokenizer(txt_filter(txt).split(' '))[:max_bag_size, :]
         bag_size = tokens.shape[0]
         context_len = tokens.shape[1]
@@ -408,7 +408,9 @@ def get_wds_dataset(args, preprocess_img, is_train, epoch=0, floor=False, tokeni
             zero_pad = [torch.zeros((1,context_len), dtype=torch.long)]*diff
             tokens += zero_pad
 
-        return torch.cat(tokens, dim=-1)
+        tokens = torch.cat(tokens, dim=-1)
+
+        return tokens
 
     pipeline.extend([
         wds.select(filter_no_caption_or_no_image),

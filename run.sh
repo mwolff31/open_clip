@@ -8,22 +8,22 @@
 #SBATCH --ntasks-per-node=8
 #SBATCH --gpus-per-task=1
 
-#SBATCH --partition=a100-preemptable
+#SBATCH --partition=a100
 #SBATCH --time=3-00:00
 #SBATCH --no-requeue
 
-#SBATCH --job-name=VITB32-200M
-#SBATCH --error=/mnt/lustre/bethge/mwolff70/new_bow/training_jobs/%j.out # jobid_taskid_arrayid
-#SBATCH --output=/mnt/lustre/bethge/mwolff70/new_bow/training_jobs/%j.out
+#SBATCH --job-name=clip_bow
+#SBATCH --error=/mnt/lustre/bethge/mwolff70/clip_bow/training_jobs/%j.out # jobid_taskid_arrayid
+#SBATCH --output=/mnt/lustre/bethge/mwolff70/clip_bow/training_jobs/%j.out
 
-#SBATCH --exclude=r2s-n31    # there is an exclude, be careful!!!!
+##SBATCH --exclude=r2s-n31    # there is an exclude, be careful!!!!
 
 name=VITB32_bowv1
 model=ViT-B-32-bow
 batch_size=600  # 700 is Max for 1 A100 node without grad accumulation
 accum_freq=7
 
-logdir="/mnt/lustre/bethge/mwolff70/new_bow/logs/"
+logdir="/mnt/lustre/bethge/mwolff70/clip_bow/logs/"
 save_dir_name=${name}_$(date +%y%m%d_%H%M%S)
 lr=5e-4
 epochs=32
@@ -39,7 +39,7 @@ export CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7
 master_addr=$(scontrol show hostnames "$SLURM_JOB_NODELIST" | head -n 1)
 export MASTER_ADDR=$master_addr
 
-cd  /mnt/lustre/bethge/mwolff70/new_bow/code/open_clip/
+cd  /mnt/lustre/bethge/mwolff70/clip_bow/code/open_clip/
 export PYTHONPATH="$PYTHONPATH:$PWD/src"
 
 srun --cpu_bind=v --accel-bind=gn \
@@ -50,7 +50,7 @@ srun --cpu_bind=v --accel-bind=gn \
       python -u src/training/main.py \
         --save-frequency 1 \
         --report-to tensorboard \
-        --train-data='/mnt/lustre/DATASETS/laion400m/laion400m-data/{00000..41455}.tar' \
+        --train-data='/mnt/lustre/bethge/pmayilvahanan31/datasets/laion-subsampled/200M/{00000..01999}.tar' \
         --dataset-type webdataset \
         --warmup 2000 \
         --batch-size ${batch_size} \
@@ -65,4 +65,4 @@ srun --cpu_bind=v --accel-bind=gn \
         --name ${save_dir_name}\
         --accum-freq ${accum_freq}\
         --logs ${logdir} \
-        --train-num-samples 1000000
+        --train-num-samples 199824274
